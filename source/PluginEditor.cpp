@@ -14,6 +14,7 @@ PluginEditor::PluginEditor (PluginProcessor& p)
         airwindowsLookAndFeel.setColour(juce::Slider::thumbColourId, airwindowsLookAndFeel.defaultColour);
     }
     updateTrackProperties();
+    updatePluginSize();
 
     idleTimer = std::make_unique<IdleTimer>(this);
     idleTimer->startTimer(1000/30); //space between UI screen updates. Larger is slower updates to screen
@@ -352,7 +353,7 @@ void PluginEditor::paint (juce::Graphics& g)
     
     g.setFont(juce::FontOptions(airwindowsLookAndFeel.newFont, g.getCurrentFont().getHeight(), 0));
     auto linewidth = getLocalBounds().getWidth(); if (getLocalBounds().getHeight() > linewidth) linewidth = getLocalBounds().getHeight();  linewidth = (int)cbrt(linewidth/2)/2;
-    if ((hostTrackName == juce::String()) || (hostTrackName.length() < 1.0f)) hostTrackName = juce::String("ConsoleH Channel");
+    if ((hostTrackName == juce::String()) || (hostTrackName.length() < 1.0f)) hostTrackName = juce::String("ConsoleHChannel");
     meter.displayTrackName = hostTrackName; //if not track name, then name of plugin. To be displayed on the actual peakmeter
     meter.displayFont = airwindowsLookAndFeel.newFont; //in the custom font, if we're using one
         
@@ -366,8 +367,11 @@ void PluginEditor::paint (juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-    inspectButton.setBounds(0, 0, 10, 10);
+    
     auto area = getLocalBounds(); // this is a huge huge routine, but not all of it runs at all times!
+    processorRef.pluginWidth = airwindowsLookAndFeel.userWidth = area.getWidth();
+    processorRef.pluginHeight = airwindowsLookAndFeel.userHeight = area.getHeight();
+    inspectButton.setBounds(0, 0, 10, 10);
     auto linewidth = (int)fmax(area.getHeight(),area.getWidth());
     linewidth = (int)cbrt(linewidth/2)-1;
     area.reduce(linewidth, linewidth);
@@ -1235,6 +1239,16 @@ void PluginEditor::updateTrackProperties() {
     if (optB.has_value()) hostTrackName = *optB;
     repaint();
 }
+
+void PluginEditor::updatePluginSize() {
+    airwindowsLookAndFeel.userWidth = processorRef.pluginWidth;
+    airwindowsLookAndFeel.userHeight = processorRef.pluginHeight;
+    if (airwindowsLookAndFeel.userWidth < 8 || airwindowsLookAndFeel.userWidth > 16386) airwindowsLookAndFeel.userWidth = 618;
+    if (airwindowsLookAndFeel.userHeight < 8 || airwindowsLookAndFeel.userHeight > 16386) airwindowsLookAndFeel.userHeight = 375;
+    repaint();
+}
+
+
 
 void PluginEditor::idle()
 {

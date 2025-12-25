@@ -80,6 +80,7 @@ public:
         userWidth = newWidth.getIntValue(); if (userWidth < 8 || userWidth > 16386) userWidth = 618;
         userHeight = newHeight.getIntValue(); if (userHeight < 8 || userHeight > 16386) userHeight = 375;
         //if you've not specified anything or your settings are crazy enough we go with defaults
+        
         defaultColour = juce::Colours::findColourForName(newColour, juce::Colours::lightgrey);
         applyTrackColour = fmax(fmin(newApplyTrackColourAmount.getFloatValue(),1.0f),0.0f);
         LEDColour = juce::Colours::findColourForName(newLEDColour, juce::Colours::red);

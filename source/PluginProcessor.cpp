@@ -219,6 +219,10 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
         float val = 0.0f; if (i < n_params) val = *(params[i]);
         xml->setAttribute(nm, val);
     }
+    if (pluginWidth < 8 || pluginWidth > 16386) pluginWidth = 618;
+    xml->setAttribute(juce::String("awchc_width"), pluginWidth);
+    if (pluginHeight < 8 || pluginHeight > 16386) pluginHeight = 375;
+    xml->setAttribute(juce::String("awchc_height"), pluginHeight);
     copyXmlToBinary(*xml, destData);
 }
 
@@ -238,6 +242,11 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
                 auto f = xmlState->getDoubleAttribute(nm);
                 params[i]->setValueNotifyingHost(f);
             }
+            auto w = xmlState->getIntAttribute(juce::String("awchc_width"));
+            if (w < 8 || w > 16386) w = 618;
+            auto h = xmlState->getIntAttribute(juce::String("awchc_height"));
+            if (h < 8 || h > 16386) h = 375;
+            updatePluginSize(w, h);
         }
         updateHostDisplay();
     }
@@ -249,9 +258,18 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 void PluginProcessor::updateTrackProperties(const TrackProperties& properties)
 {
     trackProperties = properties;
-    // call the verison in the editor to update there
+    // call the version in the editor to update there
     if (auto* editor = dynamic_cast<PluginEditor*> (getActiveEditor()))
         editor->updateTrackProperties();
+}
+
+void PluginProcessor::updatePluginSize(int w, int h)
+{
+    pluginWidth = w;
+    pluginHeight = h;
+    // call the version in the editor to update there
+    if (auto* editor = dynamic_cast<PluginEditor*> (getActiveEditor()))
+        editor->updatePluginSize();
 }
 
 
